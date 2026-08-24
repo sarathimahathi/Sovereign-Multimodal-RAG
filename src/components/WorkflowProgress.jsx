@@ -1,6 +1,6 @@
 import React from 'react';
 import { WORKFLOW_STEPS, useWorkbench } from '../context/WorkbenchContext';
-import { CheckCircle2, ArrowRight } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 export const WorkflowProgress = () => {
   const { activeStep, isRunning } = useWorkbench();

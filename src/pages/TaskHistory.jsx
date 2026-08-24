@@ -3,7 +3,7 @@ import Header from '../components/Header';
 import StatusBadge from '../components/StatusBadge';
 import TaskDetailModal from '../components/TaskDetailModal';
 import { useWorkbench } from '../context/WorkbenchContext';
-import { History, Search, FileText, CheckCircle2, Clock, User, Filter } from 'lucide-react';
+import { Search, FileText } from 'lucide-react';
 
 export const TaskHistory = () => {
   const { tasks } = useWorkbench();
@@ -38,7 +38,7 @@ export const TaskHistory = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search history by task, model, or type..."
-              className="w-full pl-10 pr-4 py-2 bg-[#090d16] border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+              className="w-full pl-10 pr-4 py-2 bg-[#090d16] border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 transition-all font-sans"
             />
           </div>
 
@@ -48,9 +48,9 @@ export const TaskHistory = () => {
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   statusFilter === status
-                    ? 'bg-emerald-600 text-white shadow-md'
+                    ? 'bg-sky-600 text-white shadow-md'
                     : 'bg-[#090d16] text-slate-400 hover:text-white border border-slate-800'
                 }`}
               >
@@ -78,7 +78,7 @@ export const TaskHistory = () => {
               <tbody className="divide-y divide-slate-800/60 font-sans">
                 {filteredTasks.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="py-8 text-center text-slate-400 font-medium">
+                    <td colSpan="7" className="py-8 text-center text-slate-500 font-medium">
                       No matching task history records found.
                     </td>
                   </tr>
@@ -87,16 +87,16 @@ export const TaskHistory = () => {
                     <tr
                       key={t.id}
                       onClick={() => setSelectedTask(t)}
-                      className="hover:bg-[#182235] cursor-pointer transition-colors group"
+                      className="hover:bg-[#182338] cursor-pointer transition-colors group"
                     >
                       <td className="py-3.5 px-4 font-semibold text-white">
                         <div className="flex flex-col">
-                          <span className="group-hover:text-emerald-400 transition-colors">{t.name}</span>
+                          <span className="group-hover:text-sky-300 transition-colors">{t.name}</span>
                           <span className="text-[10px] font-mono text-slate-500">{t.id}</span>
                         </div>
                       </td>
                       <td className="py-3.5 px-4">
-                        <span className="px-2.5 py-0.5 rounded-lg bg-[#090d16] text-sky-300 border border-sky-500/30 text-[11px] font-medium">
+                        <span className="px-2.5 py-0.5 rounded-lg bg-[#090d16] text-slate-300 border border-slate-800 text-[11px] font-medium">
                           {t.type}
                         </span>
                       </td>

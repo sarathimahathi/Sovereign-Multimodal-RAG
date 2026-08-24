@@ -17,19 +17,19 @@ export const FilesPage = () => {
 
       <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
         {/* Top File Summary Banner */}
-        <div className="bg-[#111827] border border-cyan-500/30 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="bg-[#111827] border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[11px] font-mono font-semibold">
-              <HardDrive className="w-3.5 h-3.5 text-cyan-400" /> On-Premise Storage Node
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#090d16] text-sky-400 border border-slate-800 text-[11px] font-mono font-semibold">
+              <HardDrive className="w-3.5 h-3.5 text-sky-400" /> On-Premise Storage Node
             </div>
             <h2 className="text-xl font-extrabold text-white">MRPL Workspace Attached Files</h2>
-            <p className="text-xs text-slate-300 max-w-xl">
+            <p className="text-xs text-slate-400 max-w-xl">
               All documents, engineering schematics, and inspection photographs are encrypted and parsed locally.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 bg-[#090d16] px-4 py-2 rounded-xl border border-cyan-500/30 text-xs font-mono text-cyan-300 font-bold">
-            <Shield className="w-4 h-4 text-cyan-400" />
+          <div className="flex items-center gap-2 bg-[#090d16] px-4 py-2 rounded-xl border border-slate-800 text-xs font-mono text-emerald-400 font-bold">
+            <Shield className="w-4 h-4 text-emerald-400" />
             <span>Zero Outbound Network Leakage</span>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
-import { Settings, Save, Server, Cpu, Database, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Save, Server, Cpu, CheckCircle2 } from 'lucide-react';
 
 export const SettingsPage = () => {
   const [apiUrl, setApiUrl] = useState('http://localhost:8000');
@@ -57,7 +57,7 @@ export const SettingsPage = () => {
                 <select
                   value={maxContextTokens}
                   onChange={(e) => setMaxContextTokens(e.target.value)}
-                  className="w-full p-2.5 bg-[#090d16] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500 transition-all font-mono cursor-pointer"
+                  className="w-full p-2.5 bg-[#090d16] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-sky-500 transition-all font-mono cursor-pointer"
                 >
                   <option value="16384">16,384 tokens</option>
                   <option value="32768">32,768 tokens</option>
@@ -70,7 +70,7 @@ export const SettingsPage = () => {
                 <select
                   value={vectorChunkSize}
                   onChange={(e) => setVectorChunkSize(e.target.value)}
-                  className="w-full p-2.5 bg-[#090d16] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500 transition-all font-mono cursor-pointer"
+                  className="w-full p-2.5 bg-[#090d16] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-sky-500 transition-all font-mono cursor-pointer"
                 >
                   <option value="256">256 tokens</option>
                   <option value="512">512 tokens</option>
@@ -83,7 +83,7 @@ export const SettingsPage = () => {
                 <select
                   value={gpuThreads}
                   onChange={(e) => setGpuThreads(e.target.value)}
-                  className="w-full p-2.5 bg-[#090d16] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 transition-all font-mono cursor-pointer"
+                  className="w-full p-2.5 bg-[#090d16] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-sky-500 transition-all font-mono cursor-pointer"
                 >
                   <option value="16">16 Cores</option>
                   <option value="32">32 Cores</option>
@@ -105,7 +105,7 @@ export const SettingsPage = () => {
 
             <button
               type="submit"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-lg transition-all active:scale-95 cursor-pointer"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-lg shadow-sky-950/50 transition-all active:scale-95 cursor-pointer"
             >
               <Save className="w-4 h-4" /> Save Configuration
             </button>

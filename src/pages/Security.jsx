@@ -6,8 +6,6 @@ import {
   Cpu,
   Database,
   Server,
-  Zap,
-  CheckCircle2,
   HardDrive,
   Activity,
 } from 'lucide-react';
@@ -22,7 +20,7 @@ export const Security = () => {
 
       <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
         {/* Air-Gapped Verification Banner */}
-        <div className="bg-[#111827] border border-emerald-500/40 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="bg-[#111827] border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 text-[11px] font-mono font-semibold">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
@@ -34,17 +32,17 @@ export const Security = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 bg-[#090d16] px-4 py-2.5 rounded-xl border border-emerald-500/30 font-mono text-xs text-emerald-400 font-bold shrink-0">
+          <div className="flex items-center gap-2 bg-[#090d16] px-4 py-2.5 rounded-xl border border-slate-800 font-mono text-xs text-emerald-400 font-bold shrink-0">
             <ShieldCheck className="w-5 h-5 text-emerald-400" />
             <span>0 Outbound Packets</span>
           </div>
         </div>
 
-        {/* 6 Security Isolation Feature Cards (Multi-Color Grid) */}
+        {/* 6 Security Isolation Feature Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* 1. Local LLM Inference (Sky Blue) */}
-          <div className="p-5 rounded-2xl bg-[#111827] border border-sky-500/30 shadow-lg space-y-2">
-            <div className="w-9 h-9 rounded-xl bg-sky-950/80 text-sky-400 flex items-center justify-center border border-sky-500/40">
+          {/* 1. Local LLM Inference */}
+          <div className="p-5 rounded-2xl bg-[#111827] border border-slate-800 shadow-lg space-y-2">
+            <div className="w-9 h-9 rounded-xl bg-[#090d16] text-purple-400 flex items-center justify-center border border-slate-800">
               <Cpu className="w-5 h-5" />
             </div>
             <h3 className="text-sm font-bold text-white">Local LLM Inference</h3>
@@ -53,9 +51,9 @@ export const Security = () => {
             </p>
           </div>
 
-          {/* 2. On-Premise Vector RAG (Indigo) */}
-          <div className="p-5 rounded-2xl bg-[#111827] border border-indigo-500/30 shadow-lg space-y-2">
-            <div className="w-9 h-9 rounded-xl bg-indigo-950/80 text-indigo-400 flex items-center justify-center border border-indigo-500/40">
+          {/* 2. On-Premise Vector RAG */}
+          <div className="p-5 rounded-2xl bg-[#111827] border border-slate-800 shadow-lg space-y-2">
+            <div className="w-9 h-9 rounded-xl bg-[#090d16] text-indigo-400 flex items-center justify-center border border-slate-800">
               <Database className="w-5 h-5" />
             </div>
             <h3 className="text-sm font-bold text-white">On-Premise Vector RAG</h3>
@@ -64,9 +62,9 @@ export const Security = () => {
             </p>
           </div>
 
-          {/* 3. Containerized Code Sandbox (Purple) */}
-          <div className="p-5 rounded-2xl bg-[#111827] border border-purple-500/30 shadow-lg space-y-2">
-            <div className="w-9 h-9 rounded-xl bg-purple-950/80 text-purple-400 flex items-center justify-center border border-purple-500/40">
+          {/* 3. Containerized Code Sandbox */}
+          <div className="p-5 rounded-2xl bg-[#111827] border border-slate-800 shadow-lg space-y-2">
+            <div className="w-9 h-9 rounded-xl bg-[#090d16] text-sky-400 flex items-center justify-center border border-slate-800">
               <Server className="w-5 h-5" />
             </div>
             <h3 className="text-sm font-bold text-white">Container Sandbox Isolation</h3>
@@ -75,9 +73,9 @@ export const Security = () => {
             </p>
           </div>
 
-          {/* 4. Local File Ingestion (Cyan) */}
-          <div className="p-5 rounded-2xl bg-[#111827] border border-cyan-500/30 shadow-lg space-y-2">
-            <div className="w-9 h-9 rounded-xl bg-cyan-950/80 text-cyan-400 flex items-center justify-center border border-cyan-500/40">
+          {/* 4. Local File Ingestion */}
+          <div className="p-5 rounded-2xl bg-[#111827] border border-slate-800 shadow-lg space-y-2">
+            <div className="w-9 h-9 rounded-xl bg-[#090d16] text-blue-400 flex items-center justify-center border border-slate-800">
               <HardDrive className="w-5 h-5" />
             </div>
             <h3 className="text-sm font-bold text-white">Local File Ingestion</h3>
@@ -86,9 +84,9 @@ export const Security = () => {
             </p>
           </div>
 
-          {/* 5. Hardware Security Module (Amber) */}
-          <div className="p-5 rounded-2xl bg-[#111827] border border-amber-500/30 shadow-lg space-y-2">
-            <div className="w-9 h-9 rounded-xl bg-amber-950/80 text-amber-400 flex items-center justify-center border border-amber-500/40">
+          {/* 5. Hardware Security Module */}
+          <div className="p-5 rounded-2xl bg-[#111827] border border-slate-800 shadow-lg space-y-2">
+            <div className="w-9 h-9 rounded-xl bg-[#090d16] text-purple-400 flex items-center justify-center border border-slate-800">
               <Lock className="w-5 h-5" />
             </div>
             <h3 className="text-sm font-bold text-white">HMAC Key Encryption</h3>
@@ -97,9 +95,9 @@ export const Security = () => {
             </p>
           </div>
 
-          {/* 6. Air-Gapped Network Firewall (Emerald) */}
-          <div className="p-5 rounded-2xl bg-[#111827] border border-emerald-500/30 shadow-lg space-y-2">
-            <div className="w-9 h-9 rounded-xl bg-emerald-950/80 text-emerald-400 flex items-center justify-center border border-emerald-500/40">
+          {/* 6. Air-Gapped Network Firewall */}
+          <div className="p-5 rounded-2xl bg-[#111827] border border-slate-800 shadow-lg space-y-2">
+            <div className="w-9 h-9 rounded-xl bg-[#090d16] text-emerald-400 flex items-center justify-center border border-slate-800">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <h3 className="text-sm font-bold text-white">Air-Gapped Network Guard</h3>
@@ -120,32 +118,32 @@ export const Security = () => {
             <div className="p-4 rounded-xl bg-[#090d16] border border-slate-800 space-y-2">
               <div className="flex justify-between text-xs font-mono">
                 <span className="text-slate-400">GPU Usage</span>
-                <span className="text-sky-400 font-bold">78% (62.4 GB)</span>
+                <span className="text-purple-300 font-bold">78% (62.4 GB)</span>
               </div>
-              <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                <div className="h-full bg-sky-500 rounded-full w-[78%]"></div>
+              <div className="w-full h-2 rounded-full bg-slate-900 overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full w-[78%]"></div>
               </div>
             </div>
 
-            {/* RAM Usage Meter */}
+            {/* Memory Usage Meter */}
             <div className="p-4 rounded-xl bg-[#090d16] border border-slate-800 space-y-2">
               <div className="flex justify-between text-xs font-mono">
                 <span className="text-slate-400">Memory Usage</span>
-                <span className="text-purple-400 font-bold">62% (158 GB)</span>
+                <span className="text-sky-300 font-bold">62% (158 GB)</span>
               </div>
-              <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                <div className="h-full bg-purple-500 rounded-full w-[62%]"></div>
+              <div className="w-full h-2 rounded-full bg-slate-900 overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-sky-500 to-blue-500 rounded-full w-[62%]"></div>
               </div>
             </div>
 
-            {/* CPU Load Meter */}
+            {/* CPU Usage Meter */}
             <div className="p-4 rounded-xl bg-[#090d16] border border-slate-800 space-y-2">
               <div className="flex justify-between text-xs font-mono">
                 <span className="text-slate-400">CPU Usage</span>
-                <span className="text-indigo-400 font-bold">41% (32 Cores)</span>
+                <span className="text-slate-300 font-bold">41% (32 Cores)</span>
               </div>
-              <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                <div className="h-full bg-indigo-500 rounded-full w-[41%]"></div>
+              <div className="w-full h-2 rounded-full bg-slate-900 overflow-hidden">
+                <div className="h-full bg-slate-400 rounded-full w-[41%]"></div>
               </div>
             </div>
 
@@ -155,7 +153,7 @@ export const Security = () => {
                 <span className="text-slate-400">NVMe Vector Storage</span>
                 <span className="text-emerald-400 font-bold">54% (2.1 TB)</span>
               </div>
-              <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+              <div className="w-full h-2 rounded-full bg-slate-900 overflow-hidden">
                 <div className="h-full bg-emerald-500 rounded-full w-[54%]"></div>
               </div>
             </div>

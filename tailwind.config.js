@@ -18,9 +18,9 @@ export default {
         },
         sovereign: {
           dark: '#0f172a',
-          card: '#ffffff',
-          border: '#e2e8f0',
-          accent: '#059669',
+          card: '#111827',
+          border: '#1f2937',
+          accent: '#10b981',
         }
       },
       fontFamily: {
@@ -32,7 +32,6 @@ export default {
         'fade-in-up': 'fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
         'scale-in': 'scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards',
         'pulse-subtle': 'pulseSubtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'glow-pulse': 'glowPulse 2s infinite',
         'line-flow': 'lineFlow 1.2s linear infinite',
       },
       keyframes: {
@@ -51,10 +50,6 @@ export default {
         pulseSubtle: {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.6' },
-        },
-        glowPulse: {
-          '0%, 100%': { boxShadow: '0 0 0 0 rgba(37, 99, 235, 0.2)' },
-          '50%': { boxShadow: '0 0 0 6px rgba(37, 99, 235, 0.08)' },
         },
         lineFlow: {
           '0%': { backgroundPosition: '0% 0%' },

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header';
 import WorkflowProgress from '../components/WorkflowProgress';
 import FileUpload from '../components/FileUpload';
@@ -12,7 +12,15 @@ import DeliverableCard from '../components/DeliverableCard';
 import SourceCard from '../components/SourceCard';
 import DeliverableModal from '../components/DeliverableModal';
 import { useWorkbench } from '../context/WorkbenchContext';
-import { Plus, Sparkles, FolderUp } from 'lucide-react';
+import {
+  Paperclip,
+  SlidersHorizontal,
+  Bot,
+  FileCheck,
+  Zap,
+  FolderUp,
+  X,
+} from 'lucide-react';
 
 export const Workbench = () => {
   const {
@@ -22,122 +30,207 @@ export const Workbench = () => {
     PRESET_SCENARIOS,
   } = useWorkbench();
 
+  // Sidebar toggle state & right panel tab state
+  const [showInspector, setShowInspector] = useState(true);
+  const [showFileDrawer, setShowFileDrawer] = useState(false);
+  const [inspectorTab, setInspectorTab] = useState('agent'); // 'agent', 'deliverables', 'telemetry'
+
   return (
     <div className="flex-1 flex flex-col bg-[#0b0f19] text-slate-100 min-h-screen page-transition select-none">
-      {/* Top Header */}
+      {/* Top Main Header */}
       <Header
         title="AI Workbench"
-        subtitle="3-Column Confidential On-Premise Industrial AI Task Execution Sandbox"
+        subtitle="Confidential On-Premise Industrial AI Task Execution Sandbox"
       />
 
-      {/* Workflow Step Tracker */}
+      {/* Connected Step Workflow Progress Bar */}
       <WorkflowProgress />
 
-      {/* MAIN 3-COLUMN WORKBENCH GRID */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-0 min-h-[calc(100vh-130px)]">
-        {/* LEFT PANEL: Task & Files (3 cols) */}
-        <aside className="lg:col-span-3 bg-[#0e1320] border-r border-slate-800 p-4 flex flex-col justify-between space-y-4">
-          <div className="space-y-4">
-            {/* Title & New Task Button */}
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div>
-                <h2 className="text-xs font-bold text-white uppercase tracking-wider">Current Task</h2>
-                <p className="text-[11px] text-sky-400 font-mono truncate max-w-[170px]" title={currentTaskName}>
+      {/* EXPANSIVE CHATBOT & INSPECTOR LAYOUT */}
+      <div className="flex-1 flex min-h-[calc(100vh-130px)] relative overflow-hidden">
+        {/* MAIN SPACIOUS CHATBOT CENTER PANEL */}
+        <main className="flex-1 flex flex-col bg-[#0b0f19] justify-between relative min-w-0">
+          {/* Top Chat Control Bar */}
+          <div className="p-3 bg-[#0e1320] border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 px-6 shadow-sm">
+            {/* Left Task Title & Demo Scenario Pills */}
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Current Task</span>
+                <h2 className="text-xs font-extrabold text-white truncate max-w-xs sm:max-w-md" title={currentTaskName}>
                   {currentTaskName}
-                </p>
+                </h2>
               </div>
-              <button
-                onClick={() => applyPresetScenario('preset-1')}
-                className="flex items-center gap-1 bg-sky-950/80 hover:bg-sky-900 text-sky-300 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-sky-500/40 transition-all duration-150 active:scale-95 cursor-pointer shadow-xs"
-                title="Reset to New Task"
-              >
-                <Plus className="w-3.5 h-3.5" /> New Task
-              </button>
-            </div>
 
-            {/* Industrial Scenario Presets for SIH Jury */}
-            <div className="space-y-1.5 bg-[#111827] p-3 rounded-xl border border-slate-800">
-              <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-purple-400" /> Demo Scenarios
-              </span>
-              <div className="grid grid-cols-1 gap-1.5 pt-1">
+              {/* Demo Scenario Pill Quick Selector */}
+              <div className="hidden sm:flex items-center gap-1.5 border-l border-slate-800 pl-3">
                 {PRESET_SCENARIOS.map((p) => (
                   <button
                     key={p.id}
                     onClick={() => applyPresetScenario(p.id)}
-                    className="text-left text-xs p-2 rounded-lg bg-[#090d16] hover:bg-[#182235] border border-slate-800 hover:border-purple-500/40 transition-all duration-150 font-medium text-slate-200 line-clamp-1 hover:translate-x-0.5 cursor-pointer"
+                    className="px-2.5 py-1 rounded-lg bg-[#090d16] hover:bg-[#182235] text-sky-300 border border-slate-800 text-[11px] font-medium transition-all cursor-pointer truncate max-w-[140px]"
+                    title={p.title}
                   >
-                    🎯 {p.title}
+                    🎯 {p.title.split(' ')[1] || p.title}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* File Upload Component */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                <FolderUp className="w-3.5 h-3.5 text-sky-400" /> Attached Files ({uploadedFiles.length})
-              </label>
-              <FileUpload />
-            </div>
+            {/* Right Quick Controls */}
+            <div className="flex items-center gap-2 shrink-0">
+              {/* File Attachment Pill Drawer Toggle */}
+              <button
+                onClick={() => setShowFileDrawer(!showFileDrawer)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                  uploadedFiles.length > 0 || showFileDrawer
+                    ? 'bg-sky-600 text-white border-sky-500'
+                    : 'bg-[#090d16] text-slate-300 border-slate-800 hover:bg-[#182235]'
+                }`}
+              >
+                <Paperclip className="w-3.5 h-3.5" />
+                <span>Files ({uploadedFiles.length})</span>
+              </button>
 
-            {/* Ready Files List */}
-            <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
-              {uploadedFiles.length === 0 ? (
-                <p className="text-xs text-slate-500 italic text-center py-4 bg-[#111827] rounded-xl border border-slate-800">
-                  No files attached yet.
-                </p>
-              ) : (
-                uploadedFiles.map((file) => <FileCard key={file.id} file={file} />)
+              {/* Inspector Panel Toggle Button */}
+              <button
+                onClick={() => setShowInspector(!showInspector)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                  showInspector
+                    ? 'bg-sky-600 text-white border-sky-500'
+                    : 'bg-[#090d16] text-slate-300 border-slate-800 hover:bg-[#182235]'
+                }`}
+                title={showInspector ? 'Hide Inspector Panel' : 'Show Inspector Panel'}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>{showInspector ? 'Hide Inspector' : 'Show Inspector'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Slide-Down Compact File Attachment Drawer */}
+          {showFileDrawer && (
+            <div className="bg-[#0e1320] border-b border-slate-800 p-4 space-y-3 shadow-xl animate-fade-in">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <FolderUp className="w-4 h-4 text-sky-400" /> Workspace File Ingestion
+                </span>
+                <button
+                  onClick={() => setShowFileDrawer(false)}
+                  className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <FileUpload />
+
+              {uploadedFiles.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 pt-1">
+                  {uploadedFiles.map((file) => (
+                    <FileCard key={file.id} file={file} />
+                  ))}
+                </div>
               )}
             </div>
+          )}
+
+          {/* EXPANSIVE SPACIOUS CHAT CONVERSATION WINDOW */}
+          <div className="flex-1 flex flex-col justify-between overflow-hidden">
+            <ChatWindow />
+            <ChatInput />
           </div>
-
-          <div className="p-3 rounded-xl bg-[#090d16] border border-slate-800 text-white text-[11px] font-mono space-y-1">
-            <span className="text-emerald-400 font-semibold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-              LOCAL ISOLATION ACTIVE
-            </span>
-            <p className="text-slate-400">All uploaded bytes parsed locally via PyPDF2 / pdf2image in isolated Docker sandbox.</p>
-          </div>
-        </aside>
-
-        {/* CENTER PANEL: Execution & Conversation (6 cols) */}
-        <main className="lg:col-span-6 bg-[#090d16] flex flex-col justify-between border-r border-slate-800 relative">
-          <div className="p-3 bg-[#0e1320] border-b border-slate-800 flex items-center justify-between px-6">
-            <h2 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
-              AI Workbench Execution Log
-            </h2>
-            <span className="text-[11px] text-slate-400 font-mono">
-              Confidential Industrial AI Engine
-            </span>
-          </div>
-
-          {/* Chat / Assistant Conversation */}
-          <ChatWindow />
-
-          {/* Task Input Box */}
-          <ChatInput />
         </main>
 
-        {/* RIGHT PANEL: Agent Operations & Deliverables (3 cols) */}
-        <aside className="lg:col-span-3 bg-[#0e1320] p-4 space-y-4 overflow-y-auto max-h-[calc(100vh-130px)]">
-          {/* SECTION 1: AGENT ACTIVITY */}
-          <AgentActivity />
+        {/* COMPACT DE-CLUTTERED RIGHT INSPECTOR SIDEBAR */}
+        {showInspector && (
+          <aside className="w-80 lg:w-96 bg-[#0e1320] border-l border-slate-800 p-4 flex flex-col space-y-4 overflow-y-auto max-h-[calc(100vh-130px)] shrink-0 transition-all duration-200 shadow-2xl">
+            {/* Tab Header Switcher */}
+            <div className="flex items-center gap-1 bg-[#090d16] p-1 rounded-xl border border-slate-800 shrink-0">
+              <button
+                onClick={() => setInspectorTab('agent')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                  inspectorTab === 'agent'
+                    ? 'bg-sky-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Bot className="w-3.5 h-3.5" /> Agent & Tools
+              </button>
+              <button
+                onClick={() => setInspectorTab('deliverables')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                  inspectorTab === 'deliverables'
+                    ? 'bg-sky-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <FileCheck className="w-3.5 h-3.5" /> Outputs & RAG
+              </button>
+              <button
+                onClick={() => setInspectorTab('telemetry')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                  inspectorTab === 'telemetry'
+                    ? 'bg-sky-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Zap className="w-3.5 h-3.5" /> Telemetry
+              </button>
+            </div>
 
-          {/* SECTION 2: MODEL ROUTER */}
-          <ModelRouter />
+            {/* TAB 1: AGENT & TOOLS */}
+            {inspectorTab === 'agent' && (
+              <div className="space-y-4 animate-fade-in">
+                <AgentActivity />
+                <ModelRouter />
+                <ToolActivity />
+              </div>
+            )}
 
-          {/* SECTION 3: TOOL CALLS */}
-          <ToolActivity />
+            {/* TAB 2: OUTPUTS & RAG */}
+            {inspectorTab === 'deliverables' && (
+              <div className="space-y-4 animate-fade-in">
+                <DeliverableCard />
+                <SourceCard />
+              </div>
+            )}
 
-          {/* SECTION 4: DELIVERABLES */}
-          <DeliverableCard />
+            {/* TAB 3: REAL-TIME TELEMETRY */}
+            {inspectorTab === 'telemetry' && (
+              <div className="space-y-4 animate-fade-in">
+                <div className="bg-[#111827] border border-slate-800 rounded-xl p-4 space-y-3 shadow-md">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
+                      <Zap className="w-4 h-4 text-sky-400" /> Live Telemetry
+                    </h3>
+                    <span className="text-[10px] font-mono text-emerald-400 font-semibold bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/40">
+                      AIR-GAPPED
+                    </span>
+                  </div>
 
-          {/* SOURCES USED (RAG) */}
-          <SourceCard />
-        </aside>
+                  <div className="space-y-2 font-mono text-xs">
+                    <div className="p-2.5 rounded-lg bg-[#090d16] border border-slate-800 flex justify-between">
+                      <span className="text-slate-400">GPU VRAM Allocated</span>
+                      <span className="text-sky-400 font-bold">14.2 GB</span>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-[#090d16] border border-slate-800 flex justify-between">
+                      <span className="text-slate-400">gVisor Container RAM</span>
+                      <span className="text-purple-400 font-bold">18.2 MB</span>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-[#090d16] border border-slate-800 flex justify-between">
+                      <span className="text-slate-400">Vector RAG Latency</span>
+                      <span className="text-indigo-400 font-bold">0.42s</span>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-[#090d16] border border-slate-800 flex justify-between">
+                      <span className="text-slate-400">HMAC Security Signature</span>
+                      <span className="text-emerald-400 font-bold">SHA-256 Valid</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </aside>
+        )}
       </div>
 
       {/* Deliverable Preview & Download Modal */}

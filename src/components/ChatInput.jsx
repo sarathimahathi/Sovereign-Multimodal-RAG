@@ -23,9 +23,9 @@ export const ChatInput = () => {
   const canRun = !isRunning && (taskPrompt.trim().length > 0 || uploadedFiles.length > 0);
 
   return (
-    <div className="p-4 bg-[#0d121f] border-t border-slate-800 shadow-xl sticky bottom-0 z-10">
+    <div className="p-4 bg-[#0e1320] border-t border-slate-800 shadow-xl sticky bottom-0 z-10">
       <div className="max-w-4xl mx-auto space-y-2">
-        <div className="relative rounded-xl border border-slate-800 focus-within:border-sky-500 focus-within:ring-1 focus-within:ring-sky-500 bg-[#111827] transition-all shadow-md">
+        <div className="relative rounded-xl border border-slate-800 focus-within:border-sky-500 bg-[#111827] transition-all shadow-md">
           <textarea
             value={taskPrompt}
             onChange={(e) => setTaskPrompt(e.target.value)}
@@ -37,9 +37,9 @@ export const ChatInput = () => {
           />
 
           {/* Buttons Toolbar */}
-          <div className="flex items-center justify-between px-3 py-2 bg-[#090d16] border-t border-slate-800/80 rounded-b-xl">
+          <div className="flex items-center justify-between px-3 py-2 bg-[#090d16] border-t border-slate-800 rounded-b-xl">
             <div className="flex items-center gap-2">
-              <label className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer transition-colors">
+              <label className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 cursor-pointer transition-colors">
                 <Paperclip className="w-3.5 h-3.5 text-sky-400" />
                 Attach
                 <input type="file" multiple className="hidden" />
@@ -51,10 +51,10 @@ export const ChatInput = () => {
                 className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                   isVoiceActive
                     ? 'bg-rose-950/80 text-rose-300 border border-rose-500/40 animate-pulse'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800'
                 }`}
               >
-                <Mic className="w-3.5 h-3.5 text-purple-400" />
+                <Mic className="w-3.5 h-3.5 text-sky-400" />
                 {isVoiceActive ? 'Listening...' : 'Voice'}
               </button>
             </div>
@@ -66,8 +66,8 @@ export const ChatInput = () => {
                 disabled={!canRun}
                 className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition-all shadow-lg cursor-pointer ${
                   canRun
-                    ? 'bg-sky-600 hover:bg-sky-500 text-white active:scale-95 shadow-sky-950/50'
-                    : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/60'
+                    ? 'bg-sky-600 hover:bg-sky-500 text-white shadow-sky-950/50 active:scale-95'
+                    : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
                 }`}
               >
                 {isRunning ? (
@@ -86,9 +86,9 @@ export const ChatInput = () => {
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-[11px] text-slate-500 px-1 font-mono">
+        <div className="flex items-center justify-between text-[11px] text-slate-400 px-1 font-mono">
           <span>Target Mode: On-Premise Air-Gapped Sandbox</span>
-          <span className="flex items-center gap-1 text-sky-400 font-semibold">
+          <span className="flex items-center gap-1 text-purple-400 font-semibold">
             <Sparkles className="w-3 h-3 text-purple-400" /> Multi-Model Auto Router Active
           </span>
         </div>
