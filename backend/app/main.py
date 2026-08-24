@@ -3,6 +3,7 @@ import shutil
 from typing import List, Any
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -56,10 +57,18 @@ class AgentChatRequest(BaseModel):
     prompt: str
     task_type: str = "general" # "general", "coding", "inspection_summary"
 
-@app.get("/")
-def root():
-    return {"status": "online", "system": "Sovereign AI Workbench"}
+# Serve static files and UI dashboard
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
+@app.get("/")
+def serve_dashboard():
+    index_path = os.path.join(os.path.dirname(__file__), "static", "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"status": "online", "system": "Sovereign AI Workbench"}
+    
 # --- Sandboxed Code Execution ---
 @app.post("/api/sandbox/execute")
 def run_sandbox_code(payload: CodeExecutionRequest):
