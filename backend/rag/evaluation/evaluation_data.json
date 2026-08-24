@@ -1,0 +1,7 @@
+[
+  {
+    "query": "What is the inspection procedure for valve V-204?",
+    "expected_document_id": "SOP-042",
+    "expected_page": 1
+  }
+]
