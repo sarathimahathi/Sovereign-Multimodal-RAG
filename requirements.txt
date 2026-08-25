@@ -1,0 +1,7 @@
+# Web API Server (FastAPI & Uvicorn)
+fastapi>=0.110.0
+uvicorn>=0.28.0
+python-multipart>=0.0.9
+
+# Ollama Client
+ollama>=0.3.0
