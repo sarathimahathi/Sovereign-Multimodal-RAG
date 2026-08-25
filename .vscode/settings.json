@@ -1,0 +1,11 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/sovereign-ai-workbench/.venv/Scripts/python.exe",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/sovereign-ai-workbench/backend",
+    "${workspaceFolder}/sovereign-ai-workbench"
+  ],
+  "python.autoComplete.extraPaths": [
+    "${workspaceFolder}/sovereign-ai-workbench/backend",
+    "${workspaceFolder}/sovereign-ai-workbench"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "include": [
+    "backend",
+    "agent",
+    "models",
+    "rag",
+    "multimodal",
+    "sandbox",
+    "security",
+    "document_generation",
+    "tests"
+  ],
+  "extraPaths": [
+    "backend",
+    "backend/app",
+    "."
+  ],
+  "reportMissingImports": "none",
+  "reportMissingTypeStubs": false
+}

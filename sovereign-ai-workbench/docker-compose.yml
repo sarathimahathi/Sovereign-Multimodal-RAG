@@ -1,0 +1,125 @@
+version: '3.8'
+
+services:
+  # ============================================================================
+  # Relational Database: PostgreSQL 16
+  # Stores application metadata, user accounts, audit trails, and execution logs
+  # ============================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: sovereign_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_DB: sovereign_workbench
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d sovereign_workbench"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sovereign_network
+
+  # ============================================================================
+  # Vector Database: Qdrant
+  # Stores dense embeddings and supports hybrid search for RAG workflows
+  # ============================================================================
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: sovereign_qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333" # REST API & Web Dashboard
+      - "6334:6334" # gRPC API
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:6333/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sovereign_network
+
+  # ============================================================================
+  # Local AI Inference Engine: Ollama
+  # Host local sovereign LLMs and embedding models (e.g. Llama 3, Mistral, Nomic)
+  # ============================================================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: sovereign_ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    networks:
+      - sovereign_network
+
+  # ============================================================================
+  # Backend API Server: FastAPI
+  # Application orchestration, services, API endpoints
+  # ============================================================================
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: sovereign_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres_password@postgres:5432/sovereign_workbench
+      - QDRANT_URL=http://qdrant:6333
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - JWT_SECRET=change-this-to-a-secure-random-secret-key-in-production-min-32-chars
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/app/uploads
+      - ./workspace:/app/workspace
+    networks:
+      - sovereign_network
+
+  # ============================================================================
+  # Frontend Client: Vite React
+  # Interactive UI dashboard for AI workbench
+  # ============================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sovereign_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - sovereign_network
+
+volumes:
+  postgres_data:
+    name: sovereign_postgres_data
+  qdrant_storage:
+    name: sovereign_qdrant_storage
+  ollama_models:
+    name: sovereign_ollama_models
+
+networks:
+  sovereign_network:
+    name: sovereign_ai_network
+    driver: bridge
