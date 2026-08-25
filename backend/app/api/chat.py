@@ -13,16 +13,19 @@ class ChatQuery(BaseModel):
 
 @router.post("/query")
 async def handle_chat_query(payload: ChatQuery):
-    """Synchronous execution endpoint for testing and API integration."""
-    result = SovereignWorkbenchOrchestrator.process_industrial_task(payload.prompt, payload.task_type)
+    """Synchronous execution endpoint for testing and REST API integration."""
+    result = await SovereignWorkbenchOrchestrator.process_industrial_task(
+        prompt=payload.prompt,
+        task_type=payload.task_type
+    )
     log_event("REST_TASK_EXEC", f"Task: {payload.task_type} | Prompt: {payload.prompt[:30]}", "SUCCESS")
     return result
 
 @router.websocket("/ws")
 async def websocket_agent_stream(websocket: WebSocket):
     """
-    Live streaming WebSocket connection for React frontend.
-    Streams thought steps, tool executions, and deliverable links.
+    Live streaming WebSocket connection for UI dashboard.
+    Streams thought steps, sandbox tool executions, and deliverable download links in real time.
     """
     await websocket.accept()
     log_event("WS_CONNECTED", "Frontend connected to live stream", "SUCCESS")
@@ -33,35 +36,25 @@ async def websocket_agent_stream(websocket: WebSocket):
             user_prompt = data.get("prompt", "")
             task_type = data.get("task_type", "general")
 
-            # Stream initial thought
-            await websocket.send_json({
-                "type": "thought",
-                "message": f"Analyzing task: '{user_prompt}' under strict on-premise governance..."
-            })
-            await asyncio.sleep(0.4)
+            if not user_prompt.strip():
+                continue
 
-            # Process task
-            result = SovereignWorkbenchOrchestrator.process_industrial_task(user_prompt, task_type)
-
-            # Stream intermediate steps / tool executions
-            for step in result.get("steps", []):
-                await websocket.send_json({
-                    "type": "tool_step",
-                    "step": step
-                })
-                await asyncio.sleep(0.5)
-
-            # Stream final message and any deliverable URLs
-            await websocket.send_json({
-                "type": "message",
-                "content": result.get("final_reply"),
-                "deliverable_url": result.get("deliverable_url")
-            })
-
-            await websocket.send_json({"type": "done"})
+            # Process task, streaming steps and deliverables via websocket
+            result = await SovereignWorkbenchOrchestrator.process_industrial_task(
+                prompt=user_prompt,
+                task_type=task_type,
+                websocket=websocket
+            )
             log_event("WS_TASK_COMPLETED", f"Completed: {user_prompt[:30]}", "SUCCESS")
 
     except WebSocketDisconnect:
         log_event("WS_DISCONNECTED", "Stream disconnected", "SUCCESS")
     except Exception as e:
-        await websocket.send_json({"type": "error", "message": str(e)})
+        try:
+            await websocket.send_json({
+                "sender": "Agent",
+                "message": f"Execution error: {str(e)}",
+                "type": "system"
+            })
+        except Exception:
+            pass

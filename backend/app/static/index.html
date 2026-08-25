@@ -1,158 +1,483 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Sovereign AI Workbench - Diagnostic UI</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: #0f172a; color: #f8fafc; padding: 24px; }
-    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 16px; margin-bottom: 20px; }
-    .badge { padding: 6px 14px; border-radius: 9999px; font-weight: 600; font-size: 13px; letter-spacing: 0.5px; }
-    .badge-green { background: #166534; color: #86efac; border: 1px solid #22c55e; }
-    .badge-red { background: #991b1b; color: #fca5a5; border: 1px solid #ef4444; }
-    .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-    .panel { background: #1e293b; border-radius: 8px; border: 1px solid #334155; padding: 18px; display: flex; flex-direction: column; }
-    h2 { font-size: 16px; margin-bottom: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-    #chat-box { height: 360px; overflow-y: auto; background: #0b0f19; border: 1px solid #334155; border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-    .msg { padding: 8px 12px; border-radius: 6px; font-size: 14px; max-width: 90%; }
-    .msg-user { background: #2563eb; color: #fff; align-self: flex-end; }
-    .msg-thought { background: #334155; color: #cbd5e1; font-style: italic; font-size: 12px; align-self: flex-start; }
-    .msg-tool { background: #064e3b; color: #6ee7b7; border-left: 3px solid #10b981; align-self: flex-start; }
-    .msg-bot { background: #1e293b; color: #f8fafc; border: 1px solid #475569; align-self: flex-start; }
-    .input-row { display: flex; gap: 8px; margin-top: 12px; }
-    input, select, button { padding: 10px 14px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #f8fafc; font-size: 14px; }
-    input { flex: 1; }
-    button { background: #2563eb; border: none; cursor: pointer; font-weight: 600; }
-    button:hover { background: #1d4ed8; }
-    .download-btn { display: inline-block; margin-top: 6px; padding: 6px 10px; background: #059669; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #334155; }
-    th { color: #94a3b8; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign AI Workbench</title>
+    <style>
+        :root {
+            --bg-base: #0b0f19;
+            --bg-card: #111827;
+            --bg-card-header: #1f2937;
+            --border-color: #374151;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --accent-blue: #2563eb;
+            --accent-cyan: #06b6d4;
+            --status-green: #10b981;
+            --status-red: #ef4444;
+            --status-warn: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        /* Top Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .brand h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .brand p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .airgap-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--status-green);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: currentColor;
+            display: inline-block;
+        }
+
+        /* Layout Grid */
+        .workbench-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: calc(100vh - 140px);
+        }
+
+        .card-header {
+            background-color: var(--bg-card-header);
+            padding: 12px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-body {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Chat / Live Stream Terminal */
+        #chatBox {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #d1d5db;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 3px solid #6b7280;
+        }
+
+        .log-entry.user {
+            border-left-color: var(--accent-blue);
+            color: #93c5fd;
+        }
+
+        .log-entry.system {
+            border-left-color: var(--accent-cyan);
+            color: #a5f3fc;
+        }
+
+        .log-entry.sandbox {
+            border-left-color: var(--status-warn);
+            color: #fde68a;
+        }
+
+        /* Deliverable Download Card */
+        .deliverable-box {
+            margin-top: 10px;
+            padding: 12px;
+            background: rgba(37, 99, 235, 0.1);
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .deliverable-link {
+            background-color: var(--accent-blue);
+            color: #fff;
+            padding: 6px 14px;
+            font-size: 12px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+
+        .deliverable-link:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* Card Input Toolbar */
+        .input-bar {
+            padding: 14px;
+            background-color: var(--bg-card-header);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+        }
+
+        select, input, button {
+            background: #1e293b;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        input {
+            flex: 1;
+        }
+
+        button {
+            background: var(--accent-blue);
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            padding: 8px 18px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-refresh {
+            background: #374151;
+            padding: 4px 10px;
+            font-size: 11px;
+        }
+
+        .btn-refresh:hover {
+            background: #4b5563;
+        }
+
+        /* Table Design */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #d1d5db;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+    </style>
 </head>
 <body>
 
-  <div class="header">
-    <div>
-      <h1>Sovereign AI Workbench</h1>
-      <small style="color: #64748b;">Air-Gapped Industrial Verification Platform</small>
+    <header>
+        <div class="brand">
+            <h1>Sovereign AI Workbench</h1>
+            <p>Air-Gapped Industrial Verification Platform</p>
+        </div>
+        <div id="airgapBadge" class="airgap-badge">
+            <span class="badge-dot"></span>
+            <span id="airgapText">Checking Network...</span>
+        </div>
+    </header>
+
+    <div class="workbench-grid">
+        <!-- Live Agent Chat & Tool Sandbox Section -->
+        <div class="card">
+            <div class="card-header">
+                <span>Live Agent Streaming (WebSocket)</span>
+            </div>
+            <div class="card-body" id="chatBox">
+                <div class="log-entry system">Workbench initialized. Ready for isolated verification workflows.</div>
+            </div>
+            <div class="input-bar">
+                <select id="taskType">
+                    <option value="general">General Query</option>
+                    <option value="sandbox_excel">Engineering / CGPA Calc (.xlsx)</option>
+                    <option value="docx_memo">Inspection Approval Memo (.docx)</option>
+                    <option value="pptx_presentation">Executive Presentation (.pptx)</option>
+                    <option value="pdf_report">Compliance Audit Report (.pdf)</option>
+                </select>
+                <input type="text" id="promptInput" placeholder="Enter task or instruction (e.g., generate cgpa calculator)..." onkeydown="handleKeyPress(event)" />
+                <button onclick="sendTask()">Send</button>
+            </div>
+        </div>
+
+        <!-- Audit Trail / SQLite Log DB -->
+        <div class="card">
+            <div class="card-header">
+                <span>Audit Log DB</span>
+                <div style="display: flex; gap: 6px;">
+                    <a href="/api/audit/export" download="sovereign_audit_trail.csv" class="btn-refresh" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center;">📥 CSV</a>
+                    <button class="btn-refresh" onclick="fetchAuditLogs()">Refresh</button>
+                </div>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditTableBody">
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: var(--text-muted);">Loading audit trails...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-    <div id="airgap-badge" class="badge badge-green">CHECKING NETWORK...</div>
-  </div>
 
-  <div class="grid">
-    <!-- Left Panel: Chat & Streaming Tools -->
-    <div class="panel">
-      <h2>Live Agent Streaming (WebSocket)</h2>
-      <div id="chat-box"></div>
-      <div class="input-row">
-        <select id="task-select">
-          <option value="general">General Query</option>
-          <option value="coding">Engineering Calculation (Sandbox)</option>
-          <option value="inspection_summary">Inspection Approval Memo (.docx)</option>
-        </select>
-        <input type="text" id="prompt-input" placeholder="Type engineering request..." value="Calculate safety factor for piping valve V-204" />
-        <button onclick="sendTask()">Send</button>
-      </div>
-    </div>
+    <script>
+        const host = window.location.host;
+        const protocol = window.location.protocol === "https:" ? "https:" : "http:";
+        const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        let ws;
 
-    <!-- Right Panel: Live Security Audit Logs -->
-    <div class="panel">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <h2>Audit Log DB</h2>
-        <button onclick="fetchAuditLogs()" style="padding: 4px 8px; font-size: 11px;">Refresh</button>
-      </div>
-      <div style="height: 360px; overflow-y: auto;">
-        <table>
-          <thead>
-            <tr><th>Action</th><th>Status</th><th>Details</th></tr>
-          </thead>
-          <tbody id="audit-table-body"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+        // 1. Initialize WebSocket Connection
+        function connectWS() {
+            ws = new WebSocket(`${wsProtocol}//${host}/api/chat/ws`);
 
-  <script>
-    let ws;
-    const chatBox = document.getElementById("chat-box");
+            ws.onopen = () => {
+                appendLog("System", "Connected to local streaming agent WebSocket.", "system");
+            };
 
-    function connectWS() {
-      ws = new WebSocket("ws://" + window.location.host + "/api/chat/ws");
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === "thought") {
-          appendMessage(data.message, "msg-thought");
-        } else if (data.type === "tool_step") {
-          appendMessage("⚙️ " + data.step, "msg-tool");
-        } else if (data.type === "message") {
-          let html = data.content;
-          if (data.deliverable_url) {
-            html += `<br><a class="download-btn" href="${data.deliverable_url}" target="_blank">📥 Download Deliverable File</a>`;
-          }
-          appendMessage(html, "msg-bot", true);
-          fetchAuditLogs();
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    // Display agent thoughts or output
+                    if (data.message) {
+                        appendLog(data.sender || "Agent", data.message, data.type || "system");
+                    }
+
+                    // Handle generated deliverable files
+                    if (data.file_url) {
+                        appendDeliverable(data.filename || "Deliverable", data.file_url);
+                        fetchAuditLogs(); // Refresh DB when deliverable generated
+                    }
+                } catch (e) {
+                    appendLog("Agent", event.data, "system");
+                }
+            };
+
+            ws.onclose = () => {
+                appendLog("System", "WebSocket disconnected. Reconnecting in 3s...", "system");
+                setTimeout(connectWS, 3000);
+            };
+
+            ws.onerror = (err) => {
+                console.error("WebSocket Error:", err);
+            };
         }
-      };
-      ws.onclose = () => setTimeout(connectWS, 2000);
-    }
 
-    function appendMessage(text, className, isHTML = false) {
-      const msg = document.createElement("div");
-      msg.className = "msg " + className;
-      if (isHTML) msg.innerHTML = text; else msg.textContent = text;
-      chatBox.appendChild(msg);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
+        // 2. Dispatch Task to Agent
+        function sendTask() {
+            const input = document.getElementById("promptInput");
+            const taskType = document.getElementById("taskType").value;
+            const prompt = input.value.trim();
 
-    function sendTask() {
-      const input = document.getElementById("prompt-input");
-      const taskType = document.getElementById("task-select").value;
-      const prompt = input.value.trim();
-      if (!prompt) return;
+            if (!prompt) return;
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                alert("WebSocket is not connected. Please ensure backend is running.");
+                return;
+            }
 
-      appendMessage(prompt, "msg-user");
-      ws.send(JSON.stringify({ prompt: prompt, task_type: taskType }));
-      input.value = "";
-    }
+            appendLog("User", `[${taskType}] ${prompt}`, "user");
 
-    async function checkAirgap() {
-      try {
-        const res = await fetch("/api/security/network-status");
-        const data = await res.json();
-        const badge = document.getElementById("airgap-badge");
-        if (data.app_isolated) {
-          badge.className = "badge badge-green";
-          badge.textContent = "● 100% AIR-GAPPED (0 EGRESS)";
-        } else {
-          badge.className = "badge badge-red";
-          badge.textContent = "⚠ EXTERNAL CALLS DETECTED";
+            ws.send(JSON.stringify({
+                prompt: prompt,
+                task_type: taskType
+            }));
+
+            input.value = "";
         }
-      } catch (e) {
-        console.error("Airgap check failed", e);
-      }
-    }
 
-    async function fetchAuditLogs() {
-      try {
-        const res = await fetch("/api/audit/logs");
-        const logs = await res.json();
-        const tbody = document.getElementById("audit-table-body");
-        tbody.innerHTML = "";
-        logs.slice(0, 10).forEach(log => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `<td><b>${log.action_type}</b></td><td style="color:${log.status==='SUCCESS'?'#86efac':'#fca5a5'}">${log.status}</td><td>${log.details}</td>`;
-          tbody.appendChild(tr);
+        function handleKeyPress(e) {
+            if (e.key === "Enter") {
+                sendTask();
+            }
+        }
+
+        // 3. UI Helpers: Logs and Deliverables
+        function appendLog(sender, text, type) {
+            const chatBox = document.getElementById("chatBox");
+            const div = document.createElement("div");
+            div.className = `log-entry ${type}`;
+            div.innerHTML = `<strong>${sender}:</strong> ${escapeHtml(text)}`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function appendDeliverable(filename, url) {
+            const chatBox = document.getElementById("chatBox");
+            const div = document.createElement("div");
+            div.className = "deliverable-box";
+            div.innerHTML = `
+                <div>
+                    <strong>Deliverable Ready:</strong>
+                    <div style="color: var(--text-muted); font-size: 11px;">${escapeHtml(filename)}</div>
+                </div>
+                <a href="${url}" download class="deliverable-link">
+                    📥 Download File
+                </a>
+            `;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function escapeHtml(string) {
+            return String(string).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // 4. Airgap Monitor Polling
+        async function checkAirgap() {
+            const badge = document.getElementById("airgapBadge");
+            const text = document.getElementById("airgapText");
+
+            try {
+                const res = await fetch(`${protocol}//${host}/api/security/network-status`);
+                const data = await res.json();
+
+                if (data.is_airgapped) {
+                    badge.style.background = "rgba(16, 185, 129, 0.15)";
+                    badge.style.color = "var(--status-green)";
+                    badge.style.borderColor = "rgba(16, 185, 129, 0.3)";
+                    text.innerText = "100% AIR-GAPPED (0 EGRESS)";
+                } else {
+                    badge.style.background = "rgba(239, 68, 68, 0.15)";
+                    badge.style.color = "var(--status-red)";
+                    badge.style.borderColor = "rgba(239, 68, 68, 0.3)";
+                    text.innerText = "WARNING: NETWORK ACTIVE";
+                }
+            } catch (err) {
+                console.warn("Airgap check failed:", err);
+            }
+        }
+
+        // 5. Fetch SQLite Audit Logs
+        async function fetchAuditLogs() {
+            const tbody = document.getElementById("auditTableBody");
+
+            try {
+                const res = await fetch(`${protocol}//${host}/api/audit/logs`);
+                const logs = await res.json();
+
+                if (!Array.isArray(logs) || logs.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No logs recorded.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = logs.slice(-15).reverse().map(log => `
+                    <tr>
+                        <td style="font-weight: 600;">${escapeHtml(log.action || 'Event')}</td>
+                        <td><span style="color: ${log.status === 'SUCCESS' ? 'var(--status-green)' : 'var(--status-warn)'};">${escapeHtml(log.status || 'INFO')}</span></td>
+                        <td style="color: var(--text-muted); font-size: 11px;">${escapeHtml(log.details || '-')}</td>
+                    </tr>
+                `).join("");
+            } catch (err) {
+                console.warn("Audit log fetch failed:", err);
+            }
+        }
+
+        // Run on Page Load
+        window.addEventListener("DOMContentLoaded", () => {
+            connectWS();
+            checkAirgap();
+            fetchAuditLogs();
+            setInterval(checkAirgap, 5000);
         });
-      } catch (e) {
-        console.error("Audit log fetch failed", e);
-      }
-    }
-
-    connectWS();
-    checkAirgap();
-    fetchAuditLogs();
-    setInterval(checkAirgap, 5000);
-  </script>
+    </script>
 </body>
 </html>

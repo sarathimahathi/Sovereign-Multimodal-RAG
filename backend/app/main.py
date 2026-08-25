@@ -1,26 +1,32 @@
 import os
 import shutil
-from typing import List, Any
+from typing import List, Dict, Any, Optional
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from app.sandbox.executor import execute_code_safely
+from app.sandbox.executor import execute_code_safely, DOCKER_AVAILABLE
 from app.security.airgap_monitor import check_airgap_status
 from app.api.chat import router as chat_router
 from app.services.document_generator import (
     generate_approval_note_docx,
     generate_calculation_sheet_xlsx,
+    generate_presentation_pptx,
     STORAGE_DIR
 )
-from app.db.database import init_db, log_event, get_recent_audit_logs
+from app.db.database import (
+    init_db,
+    log_event,
+    get_recent_audit_logs,
+    export_audit_logs_csv
+)
 
 app = FastAPI(
     title="Sovereign AI Workbench Backend",
-    version="1.0.0",
-    description="Air-gapped backend API with sandboxed code execution, document generation, and audit logging."
+    version="1.1.0",
+    description="Air-gapped backend API with Docker/Isolated sandboxed execution, PPTX/Word/Excel document generation, and sovereign audit logging."
 )
 
 app.add_middleware(
@@ -30,16 +36,20 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 app.include_router(chat_router)
+
 # Initialize the SQLite database on startup
 @app.on_event("startup")
 def on_startup():
     init_db()
+    log_event("SYSTEM_BOOT", "Sovereign AI Workbench initialized in Air-Gap mode.", "SUCCESS")
 
 # --- Request Schemas ---
 class CodeExecutionRequest(BaseModel):
     code: str
     timeout: int = 5
+    prefer_docker: bool = True
 
 class ApprovalNoteRequest(BaseModel):
     title: str = "MEMORANDUM / APPROVAL NOTE"
@@ -53,34 +63,55 @@ class SpreadsheetRequest(BaseModel):
     headers: List[str]
     rows: List[List[Any]]
 
+class SlideContent(BaseModel):
+    slide_title: str
+    bullet_points: List[str]
+
+class PresentationRequest(BaseModel):
+    title: str = "PROJECT REVIEW & STRATEGY"
+    subtitle: str = "Confidential Industrial Operations"
+    slides: List[SlideContent]
+
 class AgentChatRequest(BaseModel):
     prompt: str
-    task_type: str = "general" # "general", "coding", "inspection_summary"
+    task_type: str = "general"
 
-# Serve static files and UI dashboard
+# --- Static Dashboard Route ---
 static_dir = os.path.join(os.path.dirname(__file__), "static")
-if os.path.exists(static_dir):
-    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+os.makedirs(static_dir, exist_ok=True)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 @app.get("/")
 def serve_dashboard():
-    index_path = os.path.join(os.path.dirname(__file__), "static", "index.html")
+    index_path = os.path.join(static_dir, "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
-    return {"status": "online", "system": "Sovereign AI Workbench"}
-    
+    return {
+        "status": "online",
+        "system": "Sovereign AI Workbench",
+        "docker_sandbox_available": DOCKER_AVAILABLE,
+        "air_gapped": True
+    }
+
 # --- Sandboxed Code Execution ---
 @app.post("/api/sandbox/execute")
 def run_sandbox_code(payload: CodeExecutionRequest):
-    result = execute_code_safely(payload.code, payload.timeout)
+    result = execute_code_safely(payload.code, payload.timeout, payload.prefer_docker)
     status = "SUCCESS" if result.get("success") else "FAILED"
-    log_event("SANDBOX_RUN", f"Executed code: {payload.code[:40]}...", status)
+    engine_used = result.get("engine", "unknown")
+    log_event("SANDBOX_RUN", f"Executed ({engine_used}): {payload.code[:40]}...", status)
     return result
 
 # --- Air-Gap Network Monitor ---
 @app.get("/api/security/network-status")
 def get_network_status():
-    return check_airgap_status()
+    status_report = check_airgap_status()
+    log_event(
+        "AIRGAP_AUDIT",
+        f"Audit run: isolated={status_report['is_airgapped']}, ext_calls={status_report['app_external_calls']}",
+        "SUCCESS" if status_report['is_airgapped'] else "WARNING"
+    )
+    return status_report
 
 # --- File Ingestion ---
 @app.post("/api/files/upload")
@@ -122,6 +153,18 @@ def create_xlsx(payload: SpreadsheetRequest):
     log_event("DOC_GENERATION", f"Generated xlsx: {payload.sheet_title}", "SUCCESS")
     return {"status": "created", "download_url": f"/api/files/download/{os.path.basename(path)}"}
 
+@app.post("/api/deliverables/generate-pptx")
+def create_pptx(payload: PresentationRequest):
+    slides_data = [s.dict() for s in payload.slides]
+    path = generate_presentation_pptx(
+        payload.title,
+        payload.subtitle,
+        slides_data
+    )
+    log_event("DOC_GENERATION", f"Generated pptx: {payload.title}", "SUCCESS")
+    return {"status": "created", "download_url": f"/api/files/download/{os.path.basename(path)}"}
+
+# --- File Download Route ---
 @app.get("/api/files/download/{filename}")
 def download_file(filename: str):
     file_path = os.path.join(STORAGE_DIR, filename)
@@ -129,16 +172,22 @@ def download_file(filename: str):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(file_path, filename=filename)
 
-# --- Audit Logs Endpoint ---
+# --- Audit Logs Endpoints ---
 @app.get("/api/audit/logs")
-def fetch_audit_logs():
-    return get_recent_audit_logs()
+def fetch_audit_logs(limit: int = 50):
+    return get_recent_audit_logs(limit=limit)
+
+@app.get("/api/audit/export")
+def download_audit_export():
+    csv_path = export_audit_logs_csv()
+    if not os.path.exists(csv_path):
+        raise HTTPException(status_code=500, detail="Failed to export audit logs")
+    return FileResponse(csv_path, filename="sovereign_audit_trail.csv", media_type="text/csv")
 
 # --- Agent Chat Bridge ---
 @app.post("/api/agent/query")
 def query_agent(payload: AgentChatRequest):
     log_event("CHAT_AGENT", f"Task: {payload.task_type} | Prompt: {payload.prompt[:30]}...", "SUCCESS")
-    # This endpoint is where M2 (Agent Engineer) will plug in their multi-step reasoning pipeline
     return {
         "task_type": payload.task_type,
         "response": f"Acknowledged task '{payload.task_type}'. Orchestrating agent workflow locally.",
